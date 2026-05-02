@@ -12,9 +12,6 @@ __pycache__/
 
 # Generirani podatkovni skup (notebook ga regenerira pri pokretanju)
 data.csv
-
-# Dodijeljeni skup od profesora — NE u repo (40 MB, distribuira ga profesor)
-podatkovni_skup_Bukovina.csv
 data_test.csv
 data_*.csv
 
