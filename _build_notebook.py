@@ -167,7 +167,7 @@ sljedeće logičke cjeline:
    daju **identičan rezultat na istom ulazu**.
 7. **Generator sintetskog skupa** — koristi hardcodirane liste hrvatskih
    imena (M/Ž), prezimena i gradova preuzete iz DZS-a (Državni zavod za
-   statistiku) i Wikipedije, te ih nasumično kombinira u zapise.
+   statistiku) te ih nasumično kombinira u zapise.
 8. **Pomoćni helper `run_full_suite(...)`** — izvršava cijeli set
    zadataka b)–h) za zadani indeksni ključ. Poziva se 3× u notebooku:
    za primarni ključ (prezime+ime), za datum rođenja te za mjesto
@@ -220,23 +220,29 @@ rezultata, te potpuno specificirani upiti).
 ZAKLJUCAK_MD = """Implementirana je AVL i crveno-crna varijanta balansiranog stabla,
 te obična (nebalansirana) varijanta nad istim `BinaryTree` razredom.
 Za ulaz od 1 000 000 sintetskih zapisa hrvatskih osoba dobivene su
-sljedeće okvirne visine stabala (točne vrijednosti vidi u izlazu ćelija
-za svaki indeksni ključ):
+sljedeće stvarne visine stabala i vremena izgradnje za svaki indeksni ključ:
 
-- **AVL**: ~21–23 razine (vrlo blizu teoretskoj donjoj granici
-  ⌈log₂(1 000 000)⌉ ≈ 20; AVL svojstvo `|h(L) − h(R)| ≤ 1` provjereno je
-  preko `assertAVLProperty()` — uvijek vraća `True`).
-- **RB**: ~23–25 razina (RB dopušta do `2·log₂(N+1)` razina, što za
-  1M iznosi ~40, dakle u praksi smo *daleko ispod* gornje granice).
-- **Obično BST**: 49–134 razine, ovisno o ključu — primarni ključ
-  (prezime+ime) postiže najveću visinu jer postoji više stotina
-  duplikata po popularnim prezimenima, koji u našoj BST varijanti svi
-  idu u lijevo podstablo (`compareTo ≥ 0` → lijevo) i tvore duge lance.
-  To je očekivano i izvrsno ilustrira zašto je rebalansiranje potrebno.
+- **Primarni ključ (prezime+ime)**: obični BST visina 134 i vrijeme
+  10.863 s; AVL visina 23 i vrijeme 7.850 s; RB visina 25 i vrijeme
+  4.955 s.
+- **Datum rođenja**: obični BST visina 53 i vrijeme 11.052 s; AVL
+  visina 23 i vrijeme 7.899 s; RB visina 24 i vrijeme 4.764 s.
+- **Mjesto stanovanja**: obični BST visina 49 i vrijeme 9.971 s; AVL
+  visina 23 i vrijeme 7.430 s; RB visina 23 i vrijeme 4.551 s.
 
-Vremena izgradnje sva su *O(N log N)*; mjerenja stalno favoriziraju
-RB stablo (~5 s) nad AVL-om (~8 s) na 1M zapisa, jer RB ima
-manje održavanja visine i kraće fix-up petlje. Pretrage (prefiks i
+AVL visina 23 za sva tri ključa vrlo je blizu teoretskoj donjoj granici
+`⌈log₂(1 000 000)⌉ ≈ 20`; AVL svojstvo `|h(L) − h(R)| ≤ 1` provjereno je
+preko `assertAVLProperty()` i u svim pokretanjima vraća `True`. RB visine
+od 23 do 25 također su daleko ispod dopuštene gornje granice
+`2·log₂(N+1)`. Obično BST stablo ima raspon visina 49–134, pri čemu je
+najveća visina kod primarnog ključa jer popularna prezimena stvaraju mnogo
+duplikata koji u nebalansiranoj varijanti idu u lijevo podstablo
+(`compareTo ≥ 0` → lijevo) i tvore duže lance.
+
+Vremena izgradnje sva su *O(N log N)*; na 1 000 000 zapisa mjerenja
+u svim trima slučajevima favoriziraju RB stablo nad AVL-om. RB se gradi
+za 4.551–4.955 s, dok AVL treba 7.430–7.899 s, jer RB ima manje strogo
+održavanje visine i kraće fix-up petlje. Pretrage (prefiks i
 range) su sub-milisekundne na svim trima strukturama; razlika je
 zanemariva u apsolutnim vrijednostima, ali bi pri patološki sortiranom
 ulazu obična BST degradirala u *O(N)* po pretrazi, dok AVL/RB i tada
@@ -405,7 +411,7 @@ def main() -> None:
             "## 6) Generator sintetskog skupa hrvatskih osoba (bonus +3)\n\n"
             "Hardcodirane liste hrvatskih **imena** (M i Ž), **prezimena** i\n"
             "**gradova** preuzete iz javnih izvora DZS-a (popis stanovništva\n"
-            "2021.) i Wikipedije. Atomski podaci su stvarni; kombinacije\n"
+            "2021.). Atomski podaci su stvarni; kombinacije\n"
             "(koje ime + prezime + grad + datum) su nasumične sa fiksnim\n"
             "seed-om radi reproducibilnosti.\n",
             sections["Generator sintetskog skupa hrvatskih osoba"],
