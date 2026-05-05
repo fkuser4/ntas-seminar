@@ -1,7 +1,8 @@
 """
-Razvojni file — sve komponente seminarskog rada u jednom Python modulu radi
-brze iteracije/testiranja. Konačna predaja je notebook (build_notebook.py
-slaže ovo u .ipynb ćelije). Ovaj file nije dio predaje.
+Pomoćni modul za izgradnju seminarskog notebooka.
+
+Komponente su izdvojene u Python modul kako bi se `Seminar_I_2026.ipynb`
+mogao reproducibilno izgraditi skriptom `_build_notebook.py`.
 """
 
 from __future__ import annotations
@@ -191,7 +192,7 @@ class BinaryNode:
         return parent
            
     def removeFromParent (self, parent, val):
-        """Helper method for remove. Ensures proper behavior when removing node that 
+        """Auxiliary method for remove. Ensures proper behavior when removing node that
         has children."""
         if parent:
             return parent.remove(val)
@@ -356,7 +357,7 @@ def _cap_reached(results, max_results):
 class IndexedNode(BinaryNode):
     """BinaryNode koji compareTo radi nad ključem, a 'value' je PersonRecord."""
 
-    KEY_FN = staticmethod(lambda r: r)  # subclass overrides
+    KEY_FN = staticmethod(lambda r: r)  # podklase definiraju
 
     def compareTo(self, value):
         a = type(self).KEY_FN(self.value)
@@ -597,7 +598,7 @@ CountingCityKeyTree = make_counting_tree(CityKeyTree)
 
 
 # ============================================================================
-# Crveno-crno stablo (bonus +3)
+# Crveno-crno stablo (dodatni zadatak)
 # ============================================================================
 
 
@@ -1174,7 +1175,7 @@ def load_dataset(path: str = "data.csv") -> list[PersonRecord]:
 
 
 # ============================================================================
-# Pomoćni helper run_full_suite — izvodi cijeli set zadataka b)–h) za zadani indeksni ključ (poziva se 3x u notebooku: za prezime, datum, mjesto).
+# Pomoćna funkcija run_full_suite — izvodi cijeli set zadataka b)–h) za zadani indeksni ključ (poziva se 3x u notebooku: za prezime, datum, mjesto).
 # ============================================================================
 
 
@@ -1209,7 +1210,7 @@ def run_full_suite(
     """Izvodi b)–h) za zadani indeks. Vraća dict s rezultatima i (opcionalno) crta grafove."""
     import matplotlib
 
-    matplotlib.use("Agg") if not plot else None  # ensure headless works
+    matplotlib.use("Agg") if not plot else None  # osigurava rad bez grafičkog sučelja
     import matplotlib.pyplot as plt
 
     print(f"\n{'='*72}")
@@ -1332,7 +1333,7 @@ def run_full_suite(
         st_avl = tree_sort(sample, avl_tree_cls)
         ttavl = time.perf_counter() - t0
         assert ref == [key_fn(x) for x in st_avl]
-        # tree-sort preko RB stabla (bonus — pokriva h za RB)
+        # tree-sort preko RB stabla kao dodatna usporedba
         t0 = time.perf_counter()
         st_rb = tree_sort(sample, rb_tree_cls)
         ttrb = time.perf_counter() - t0

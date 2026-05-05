@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Builder skripta — gradi konačni Seminar_I_2026.ipynb iz _components.py.
-Idempotentna: može se pokretati više puta.
-NE IDE U PREDAJU — obrisati zajedno s _components.py prije submit-a.
+Skripta za reproducibilnu izgradnju notebooka `Seminar_I_2026.ipynb`
+iz tekstualnih predložaka i komponenti u `_components.py`.
 """
 
 from __future__ import annotations
@@ -99,7 +98,7 @@ HEADER_MD = """# PRVI SEMINARSKI RAD 2026
 
 #### Datum predaje rada: 7. svibnja 2026.
 
-#### Broj tima: TIM_##  *(ažurirati nakon dodjele profesora)*
+#### Broj tima: TIM_02
 
 #### Ime i prezime članova tima
 
@@ -118,21 +117,20 @@ iz CSV datoteke koja sadrži **1 000 000 sintetskih zapisa s hrvatskim
 imenima/prezimenima/gradovima** (atomski podaci preuzeti iz javnih izvora
 DZS-a, kombinacije nasumične sa `random.seed(42)`).
 
-**Napomena o podatkovnom skupu (bonus +3).** Tim je profesoru predložio
-korištenje **vlastitog sintetskog skupa** umjesto dodijeljenog
-`podatkovni_skup_Bukovina.csv` (1 000 000 zapisa). Naš sintetski skup
-**strukturno i veličinski podudara dodijeljeni**:
+**Napomena o podatkovnom skupu.** Kao dodatni dio rada koristi se
+**vlastiti sintetski skup** umjesto dodijeljenog
+`podatkovni_skup_Bukovina.csv` (1 000 000 zapisa). Sintetski skup
+**strukturno i veličinski odgovara dodijeljenom skupu**:
 
 - broj zapisa: 1 000 000 (isto)
 - redoslijed stupaca: `ime, prezime, spol, datum_rođenja, mjesto_stanovanja`
 - format datuma: `dd.mm.yyyy` (HR), kao u dodijeljenom
 - bez header retka, kao u dodijeljenom
 
-`load_dataset()` je k tome dovoljno tolerantan da učita i naš sintetski
-i dodijeljeni `podatkovni_skup_Bukovina.csv` bez ikakvih izmjena —
+`load_dataset()` podržava sintetski skup i dodijeljeni
+`podatkovni_skup_Bukovina.csv` iste sheme bez izmjena —
 prepoznaje (ne)postojanje header retka i normalizira datum u ISO format
-za korektno leksikografsko sortiranje. Notebook se može pokrenuti i nad
-dodijeljenim skupom samo izmjenom putanje u ćeliji 8.
+za korektno leksikografsko sortiranje.
 
 Cijela implementacija nalazi se u ovom Jupyter notebooku, organizirano u
 sljedeće logičke cjeline:
@@ -140,7 +138,7 @@ sljedeće logičke cjeline:
 1. **Pomoćni razred `PersonRecord`** — `dataclass` s 5 polja koja
    odgovaraju shemi CSV-a.
 2. **Indeksirani čvorovi (`IndexedNode` + tri varijante)** — nasljeđuju
-   već zadani razred `BinaryNode` te override-aju `compareTo` da uspoređuju
+   već zadani razred `BinaryNode` te nadjačavaju `compareTo` tako da uspoređuju
    ključ umjesto cijele vrijednosti. Tri varijante odgovaraju trima
    indeksnim ključevima:
    - `PrimaryKeyNode` — ključ `(prezime, ime)`
@@ -149,15 +147,15 @@ sljedeće logičke cjeline:
    Sekundarni dijelovi ključa služe kao tiebreaker da inorder traversal
    ostane deterministički.
 3. **Obično (nebalansirano) BST** (`PlainBSTNode` mixin) — koristi isti
-   `BinaryTree` infrastrukturu, ali override-a `add()` da preskoči
+   `BinaryTree` infrastrukturu, ali nadjačava `add()` tako da preskoči
    AVL rotacije. Time se može direktno usporediti visine i vremena
    izgradnje s AVL-om, kako traži zadatak b).
 4. **AVL s brojačima rotacija** (`make_counting_tree(...)`) — tvornička
    funkcija koja iz bilo koje `IndexedTree` podklase tvori varijantu
    koja prebrojava lijeve i desne rotacije pri umetanju (zadatak d).
    `LR` rotacija broji se kao 1 lijeva + 1 desna, `RL` analogno.
-5. **Crveno-crno stablo** (`RBTree`, bonus +3) — vlastita implementacija
-   po CLRS varijanti, sa `NIL` sentinelom i fix-up procedurom nakon
+5. **Crveno-crno stablo** (`RBTree`, dodatni zadatak) — vlastita implementacija
+   po CLRS varijanti, sa `NIL` sentinelom i postupkom popravljanja nakon
    inserta. Iste 3 ključne varijante (`RBPrimaryKeyTree`, `RBDateKeyTree`,
    `RBCityKeyTree`). Provedena je kroz cijeli set zadataka b)–h)
    paralelno s AVL-om.
@@ -168,7 +166,7 @@ sljedeće logičke cjeline:
 7. **Generator sintetskog skupa** — koristi hardcodirane liste hrvatskih
    imena (M/Ž), prezimena i gradova preuzete iz DZS-a (Državni zavod za
    statistiku) te ih nasumično kombinira u zapise.
-8. **Pomoćni helper `run_full_suite(...)`** — izvršava cijeli set
+8. **Pomoćna funkcija `run_full_suite(...)`** — izvršava cijeli set
    zadataka b)–h) za zadani indeksni ključ. Poziva se 3× u notebooku:
    za primarni ključ (prezime+ime), za datum rođenja te za mjesto
    stanovanja (zadatak i, za 4-člani tim oba dodatna ključa).
@@ -186,8 +184,8 @@ quick s nasumičnim pivotom u prosjeku, tree-sort).
 PRIKAZ_REZULTATA_MD = """Ispitno okruženje provedeno je nad sintetskim skupom od **1 000 000
 zapisa** generiranih sa `random.seed(42)`. Za svaki od triju indeksnih
 ključeva (`prezime+ime`, `datum_rodjenja`, `mjesto_stanovanja`) izvedeni
-su sljedeći testovi (vidi izlaze ćelija u sekciji *Pokretanje za …
-ključ*):
+su sljedeći testovi. Rezultati su prikazani u izvršenim ćelijama za
+pojedini indeksni ključ.
 
 - **b)** Izgradnja običnog BST-a, AVL-a i RB stabla; ispis visina i
   mjerenje vremena izgradnje (preko `time.perf_counter()`).
@@ -206,10 +204,10 @@ ključ*):
   struktura.
 - **h)** Sortiranje na rastućim podskupovima
   (1k, 2k, 5k, 10k, 20k, 50k, 100k) algoritmima insertion / merge /
-  quick / tree-sort (preko AVL-a) / tree-sort (preko RB stabla, bonus).
+  quick / tree-sort (preko AVL-a) / tree-sort (preko RB stabla kao
+  dodatne usporedbe).
   Sve veličine pokrenute su za sve algoritme — insertion sort na 100k
-  traje par minuta, što je upravo ono što kvadratna složenost predviđa
-  i log-log graf to vizualno potvrđuje.
+  traje nekoliko minuta, što je u skladu s kvadratnom složenošću.
 
 Ispitni slučajevi su izabrani da pokažu i tipične upite (česta hrvatska
 prezimena/imena/gradovi) i rubne (kratki prefiksi koji vraćaju mnogo
@@ -242,22 +240,25 @@ duplikata koji u nebalansiranoj varijanti idu u lijevo podstablo
 Vremena izgradnje sva su *O(N log N)*; na 1 000 000 zapisa mjerenja
 u svim trima slučajevima favoriziraju RB stablo nad AVL-om. RB se gradi
 za 4.551–4.955 s, dok AVL treba 7.430–7.899 s, jer RB ima manje strogo
-održavanje visine i kraće fix-up petlje. Pretrage (prefiks i
-range) su sub-milisekundne na svim trima strukturama; razlika je
+održavanje visine i kraće postupke popravljanja nakon umetanja. Pretrage (prefiks i
+range) traju ispod 1 ms u prikazanim mjerenjima na svim trima strukturama; razlika je
 zanemariva u apsolutnim vrijednostima, ali bi pri patološki sortiranom
 ulazu obična BST degradirala u *O(N)* po pretrazi, dok AVL/RB i tada
 drže *O(log N)*.
 
-Sortiranja jasno potvrđuju asimptotsku analizu: insertion sort raste
-kvadratno (na log-log grafu nagib ≈ 2), dok merge / quick / tree-sort
-drže linearno-logaritmsko ponašanje (nagib ≈ 1). Za 100 000 zapisa
-quick sort se izvodi za ~0.25 s, merge za ~0.30 s, tree-sort (AVL/RB)
-za ~0.6 s, dok insertion sort traje nekoliko minuta. Tree-sort preko
-RB stabla je usporediv s onim preko AVL-a — što opet potvrđuje da
-konstantni faktor odabrane balansirane strukture nije presudan.
+Rezultati sortiranja odgovaraju očekivanoj složenosti pojedinih
+algoritama. Insertion sort raste znatno brže od ostalih algoritama i za
+100 000 zapisa traje nekoliko minuta, što je u skladu s kvadratnom
+složenošću. Merge sort, quick sort i tree-sort ponašaju se znatno bolje
+na većim ulazima. Za 100 000 zapisa quick sort se izvodi za
+0.224–0.300 s, merge sort za 0.274–0.284 s, tree-sort preko AVL stabla
+za 0.559–0.587 s, a tree-sort preko RB stabla za 0.281–0.294 s. RB
+varijanta tree-sorta u prikazanim mjerenjima ostvaruje kraća vremena
+izvođenja od AVL varijante, dok obje varijante sortiraju zapise
+umetanjem u balansirano stablo i obilaskom stabla u rastućem redoslijedu.
 
 Indeksi nad svim trima atributima (prezime+ime, datum rođenja, mjesto
-stanovanja) ponašaju se kvalitativno jednako, pa se može zaključiti da
+stanovanja) pokazuju iste trendove, pa se može zaključiti da
 je odabir indeksnog ključa stvar primjenske semantike, a ne
 algoritamske složenosti.
 """
@@ -315,12 +316,12 @@ from datetime import date, timedelta
 
 import matplotlib.pyplot as plt
 
-# Veće stablo + plain BST mogu uzrokovati duboke rekurzije pri walk-anju.
+# Veće stablo i obični BST mogu uzrokovati duboke rekurzije pri obilasku.
 sys.setrecursionlimit(200_000)
 
 # Veličina sintetskog skupa — 1 000 000 zapisa, podudarno s dodijeljenim
 # skupom 'podatkovni_skup_Bukovina.csv' radi zadovoljavanja uvjeta
-# "isti red veličine" za bonus +3.
+# Veličina odgovara uvjetu za dodatni sintetski skup.
 N_RECORDS = 1_000_000
 RANDOM_SEED = 42
 
@@ -345,7 +346,7 @@ def make_run_cell(label: str, plain_cls: str, avl_cls: str, count_cls: str, rb_c
     range_examples=[{re_}],
     sort_sizes=[1000, 2000, 5000, 10000, 20000, 50000, 100000],
     # insertion_sort_max=None znači: izvršavamo insertion sort i na 50k i 100k
-    # iako je kvadratno spor (procijenjeno 50k≈45s, 100k≈3min — sukladno spec.).
+    # iako je kvadratno spor (procijenjeno 50k≈45s, 100k≈3min — u skladu sa specifikacijom).
     insertion_sort_max=None,
     plot=True,
 )
@@ -367,7 +368,7 @@ def main() -> None:
         (
             "## 1) Razred zapisa i indeksirani čvorovi\n\n"
             "`PersonRecord` modelira jedan redak iz `data.csv`. `IndexedNode`\n"
-            "nasljeđuje `BinaryNode` i override-a `compareTo` da uspoređuje\n"
+            "nasljeđuje `BinaryNode` i nadjačava `compareTo` tako da uspoređuje\n"
             "**ključ** umjesto cijele vrijednosti. Tri varijante (`PrimaryKeyNode`,\n"
             "`DateKeyNode`, `CityKeyNode`) odgovaraju trima indeksnim ključevima\n"
             "(zadaci b–h za primarni ključ; zadatak i za datum i mjesto).\n",
@@ -375,7 +376,7 @@ def main() -> None:
         ),
         (
             "## 2) Obično (nebalansirano) BST\n\n"
-            "Mixin `_PlainAddMixin` override-a `add()` da preskoči AVL\n"
+            "Razred `_PlainAddMixin` nadjačava `add()` tako da preskoči AVL\n"
             "rotacije, čime od istog `BinaryNode` dobijemo običan BST insert.\n"
             "Koristi se preko `PlainPrimaryKeyTree` / `PlainDateKeyTree` /\n"
             "`PlainCityKeyTree`.\n",
@@ -391,13 +392,13 @@ def main() -> None:
             sections["AVL s brojačima rotacija (zadatak d)"],
         ),
         (
-            "## 4) Crveno-crno stablo (bonus +3)\n\n"
+            "## 4) Crveno-crno stablo (dodatni zadatak)\n\n"
             "Klasična CLRS implementacija RB stabla s `NIL` sentinelom i\n"
-            "fix-up procedurom nakon inserta. Tri ključne varijante prate\n"
+            "postupkom popravljanja nakon umetanja. Tri ključne varijante prate\n"
             "AVL pandane (`RBPrimaryKeyTree` / `RBDateKeyTree` /\n"
             "`RBCityKeyTree`). RB stablo prolazi kroz cijeli set b)–h)\n"
             "paralelno s AVL-om.\n",
-            sections["Crveno-crno stablo (bonus +3)"],
+            sections["Crveno-crno stablo (dodatni zadatak)"],
         ),
         (
             "## 5) Sortiranja (zadatak h)\n\n"
@@ -408,8 +409,8 @@ def main() -> None:
             sections["Sortiranja"],
         ),
         (
-            "## 6) Generator sintetskog skupa hrvatskih osoba (bonus +3)\n\n"
-            "Hardcodirane liste hrvatskih **imena** (M i Ž), **prezimena** i\n"
+            "## 6) Generator sintetskog skupa hrvatskih osoba (dodatni zadatak)\n\n"
+            "Unaprijed definirane liste hrvatskih **imena** (M i Ž), **prezimena** i\n"
             "**gradova** preuzete iz javnih izvora DZS-a (popis stanovništva\n"
             "2021.). Atomski podaci su stvarni; kombinacije\n"
             "(koje ime + prezime + grad + datum) su nasumične sa fiksnim\n"
@@ -417,12 +418,12 @@ def main() -> None:
             sections["Generator sintetskog skupa hrvatskih osoba"],
         ),
         (
-            "## 7) Helper `run_full_suite` — izvršavanje zadataka b)–h)\n\n"
+            "## 7) Pomoćna funkcija `run_full_suite` — izvršavanje zadataka b)–h)\n\n"
             "Pomoćna funkcija koja za zadani indeksni ključ izvrši cijeli\n"
             "set zadataka b)–h) (mjerenje izgradnje, ispis visina, min/max,\n"
             "rotacije, ispis razina, pretrage, sortiranja s grafom).\n"
             "Poziva se 3× u nastavku — jednom za svaki indeksni ključ.\n",
-            sections["Pomoćni helper run_full_suite — izvodi cijeli set zadataka b)–h) za zadani indeksni ključ (poziva se 3x u notebooku: za prezime, datum, mjesto)."],
+            sections["Pomoćna funkcija run_full_suite — izvodi cijeli set zadataka b)–h) za zadani indeksni ključ (poziva se 3x u notebooku: za prezime, datum, mjesto)."],
         ),
     ]
 
@@ -442,8 +443,8 @@ def main() -> None:
     new_cells.append(code_cell(
         "csv_path = 'data.csv'\n"
         "\n"
-        "# Uvijek regeneriraj radi reproducibilnosti — ne dopušta se da slučajni\n"
-        "# postojeći data.csv (npr. od drugog tima) tiho zamijeni naš sintetski.\n"
+        "# Uvijek regeneriraj radi reproducibilnosti rezultata.\n"
+        "# Time postojeći data.csv ne utječe na sintetski skup za mjerenja.\n"
         "t0 = time.perf_counter()\n"
         "generate_dataset(N_RECORDS, seed=RANDOM_SEED, out_path=csv_path)\n"
         "print(f'Generirano {N_RECORDS:,} zapisa u {csv_path} '\n"
@@ -454,9 +455,9 @@ def main() -> None:
         "print(f'Učitano {len(records):,} zapisa za {time.perf_counter()-t0:.2f} s')\n"
         "print(f'Primjer prvog zapisa: {records[0]}')\n"
         "\n"
-        "# Napomena: load_dataset tolerira spec nazive stupaca\n"
+        "# Napomena: load_dataset podržava nazive stupaca iz specifikacije\n"
         "# (datum_rođenja, mjesto_stanovanja) kao i ASCII varijante — pa ovaj\n"
-        "# notebook radi i nad eventualno dodijeljenim profesorovim CSV-om iste\n"
+        "# notebook radi i nad eventualno dodijeljenim CSV-om iste\n"
         "# sheme.\n"
     ))
 
